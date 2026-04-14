@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Y · B · T · I  </title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600;700&family=Ma+Shan+Zheng&family=Noto+Sans+SC:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1410;
+    --ink-light: #3d342a;
+    --ink-faint: #6b5c4e;
+    --paper: #f5f0e8;
+    --paper-dark: #ede6d6;
+    --paper-darker: #e0d6c2;
+    --vermilion: #c0392b;
+    --vermilion-light: #e74c3c;
+    --gold: #b8860b;
+    --gold-light: #d4a017;
+    --sage: #7a8c6e;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Noto Serif SC', serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* 纸张纹理背景 */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: 
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* 装饰性竖线 */
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0; bottom: 0;
+    left: 40px;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, var(--ink-faint) 20%, var(--ink-faint) 80%, transparent);
+    opacity: 0.15;
+    pointer-events: none;
+  }
+
+  .screen {
+    display: none;
+    min-height: 100vh;
+    position: relative;
+    z-index: 1;
+  }
+  .screen.active { display: flex; }
+
+  /* ===================== INTRO ===================== */
+  #screen-intro {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 24px;
+    text-align: center;
+  }
+
+  .intro-deco {
+    font-family: 'Ma Shan Zheng', cursive;
+    font-size: 11px;
+    letter-spacing: 6px;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    margin-bottom: 32px;
+  }
+
+  .intro-title {
+    font-family: 'Ma Shan Zheng', cursive;
+    font-size: clamp(48px, 12vw, 88px);
+    line-height: 1.1;
+    color: var(--ink);
+    margin-bottom: 8px;
+    position: relative;
+  }
+
+  .intro-title-sub {
+    font-family: 'Noto Serif SC', serif;
+    font-size: clamp(14px, 3vw, 18px);
+    font-weight: 300;
+    color: var(--ink-faint);
+    letter-spacing: 4px;
+    margin-bottom: 48px;
+  }
+
+  .intro-divider {
+    width: 60px;
+    height: 1px;
+    background: var(--vermilion);
+    margin: 0 auto 40px;
+  }
+
+  .intro-desc {
+    max-width: 420px;
+    font-size: 15px;
+    line-height: 2;
+    color: var(--ink-light);
+    font-weight: 300;
+    margin-bottom: 56px;
+  }
+
+  .intro-stamp {
+    display: inline-block;
+    border: 2px solid var(--vermilion);
+    color: var(--vermilion);
+    font-family: 'Ma Shan Zheng', cursive;
+    font-size: 13px;
+    letter-spacing: 3px;
+    padding: 6px 16px;
+    margin-bottom: 40px;
+    opacity: 0.7;
+  }
+
+  .btn-start {
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    font-family: 'Noto Serif SC', serif;
+    font-size: 16px;
+    font-weight: 400;
+    letter-spacing: 4px;
+    padding: 18px 56px;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s ease;
+  }
+
+  .btn-start::before {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border: 1px solid rgba(255,255,255,0.2);
+    pointer-events: none;
+  }
+
+  .btn-start:hover {
+    background: var(--ink-light);
+    transform: translateY(-2px);
+  }
+
+  .intro-note {
+    margin-top: 32px;
+    font-size: 12px;
+    color: var(--ink-faint);
+    letter-spacing: 2px;
+  }
+
+  /* ===================== QUIZ ===================== */
+  #screen-quiz {
+    flex-direction: column;
+    padding: 0;
+  }
+
+  .quiz-header {
+    padding: 24px 32px 20px;
+    border-bottom: 1px solid var(--paper-darker);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: var(--paper);
+    z-index: 10;
+  }
+
+  .quiz-brand {
+    font-family: 'Ma Shan Zheng', cursive;
+    font-size: 20px;
+    color: var(--ink-faint);
+  }
+
+  .quiz-counter {
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: var(--ink-faint);
+  }
+
+  .progress-bar {
+    height: 2px;
+    background: var(--paper-darker);
+    width: 100%;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--vermilion);
+    transition: width 0.5s ease;
+  }
+
+  .quiz-body {
+    flex: 1;
+    padding: 48px 32px 32px;
+    max-width: 640px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .q-number {
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--vermilion);
+    margin-bottom: 20px;
+  }
+
+  .q-text {
+    font-size: clamp(17px, 4vw, 22px);
+    line-height: 1.8;
+    font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 40px;
+    min-height: 80px;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .option-btn {
+    background: transparent;
+    border: 1px solid var(--paper-darker);
+    color: var(--ink-light);
+    font-family: 'Noto Serif SC', serif;
+    font-size: 15px;
+    line-height: 1.7;
+    text-align: left;
+    padding: 18px 24px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .option-btn::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--vermilion);
+    transform: scaleY(0);
+    transition: transform 0.25s ease;
+  }
+
+  .option-btn:hover {
+    border-color: var(--ink-faint);
+    color: var(--ink);
+    background: var(--paper-dark);
+    padding-left: 30px;
+  }
+
+  .option-btn:hover::before {
+    transform: scaleY(1);
+  }
+
+  .option-btn.selected {
+    border-color: var(--ink);
+    color: var(--ink);
+    background: var(--paper-dark);
+    padding-left: 30px;
+  }
+
+  .option-btn.selected::before {
+    transform: scaleY(1);
+  }
+
+  .option-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--ink-faint);
+    margin-right: 12px;
+    font-family: 'Noto Sans SC', sans-serif;
+  }
+
+  .quiz-nav {
+    padding: 24px 32px 40px;
+    max-width: 640px;
+    margin: 0 auto;
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .btn-next {
+    background: transparent;
+    border: 1px solid var(--ink);
+    color: var(--ink);
+    font-family: 'Noto Serif SC', serif;
+    font-size: 14px;
+    letter-spacing: 3px;
+    padding: 14px 40px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .btn-next.visible {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .btn-next:hover {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  /* ===================== LOADING ===================== */
+  #screen-loading {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    text-align: center;
+  }
+
+  .loading-herb {
+    font-family: 'Ma Shan Zheng', cursive;
+    font-size: 72px;
+    margin-bottom: 32px;
+    animation: breathe 2s ease-in-out infinite;
+  }
+
+  @keyframes breathe {
+    0%, 100% { opacity: 0.4; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.05); }
+  }
+
+  .loading-text {
+    font-size: 14px;
+    letter-spacing: 4px;
+    color: var(--ink-faint);
+  }
+
+  .loading-dots::after {
+    content: '';
+    animation: dots 1.5s steps(4, end) infinite;
+  }
+
+  @keyframes dots {
+    0% { content: ''; }
+    25% { content: '·'; }
+    50% { content: '··'; }
+    75% { content: '···'; }
+  }
+
+  /* ===================== RESULT ===================== */
+  #screen-result {
+    flex-direction: column;
+    padding: 0;
+  }
+
+  .result-hero {
+    padding: 60px 32px 48px;
+    text-align: center;
+    border-bottom: 1px solid var(--paper-darker);
+    position: relative;
+  }
+
+  .result-hero::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--vermilion);
+  }
+
+  .result-tag {
+    font-size: 11px;
+    letter-spacing: 5px;
+    color: var(--ink-faint);
+    margin-bottom: 24px;
+  }
+
+  .result-herb-name {
+    font-family: 'Ma Shan Zheng', cursive;
+    font-size: clamp(64px, 18vw, 120px);
+    color: var(--ink);
+    line-height: 1;
+    margin-bottom: 24px;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-tagline {
+    font-size: clamp(15px, 3.5vw, 19px);
+    font-weight: 300;
+    color: var(--ink-light);
+    line-height: 1.8;
+    max-width: 400px;
+    margin: 0 auto 32px;
+    animation: fadeUp 0.8s 0.2s ease both;
+  }
+
+  .result-dimensions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+    animation: fadeUp 0.8s 0.4s ease both;
+  }
+
+  .dim-tag {
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: var(--paper);
+    background: var(--ink-light);
+    padding: 6px 14px;
+  }
+
+  .result-body {
+    max-width: 640px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 48px 32px;
+  }
+
+  .result-section {
+    margin-bottom: 48px;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .result-section:nth-child(1) { animation-delay: 0.5s; }
+  .result-section:nth-child(2) { animation-delay: 0.65s; }
+  .result-section:nth-child(3) { animation-delay: 0.8s; }
+  .result-section:nth-child(4) { animation-delay: 0.95s; }
+
+  .section-label {
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--vermilion);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--paper-darker);
+  }
+
+  .section-content {
+    font-size: 15px;
+    line-height: 2.1;
+    color: var(--ink-light);
+    font-weight: 300;
+  }
+
+  .pairing-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .pairing-item {
+    font-size: 14px;
+    line-height: 1.9;
+    color: var(--ink-light);
+    padding-left: 20px;
+    position: relative;
+  }
+
+  .pairing-item::before {
+    content: '·';
+    position: absolute;
+    left: 0;
+    color: var(--vermilion);
+    font-size: 20px;
+    line-height: 1.4;
+  }
+
+  /* 设计说明 */
+  .design-note {
+    background: var(--paper-dark);
+    border-top: 1px solid var(--paper-darker);
+    padding: 48px 32px;
+    max-width: 640px;
+    margin: 0 auto;
+    width: 100%;
+    animation: fadeUp 0.8s 1.1s ease both;
+  }
+
+  .design-note-title {
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--ink-faint);
+    margin-bottom: 32px;
+  }
+
+  .dim-explain {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .dim-row {
+    border-left: 2px solid var(--paper-darker);
+    padding-left: 20px;
+  }
+
+  .dim-row-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+
+  .dim-row-desc {
+    font-size: 13px;
+    line-height: 1.9;
+    color: var(--ink-faint);
+    font-weight: 300;
+  }
+
+  .dim-you {
+    color: var(--vermilion);
+    font-weight: 600;
+  }
+
+  .result-footer {
+    padding: 32px;
+    text-align: center;
+    border-top: 1px solid var(--paper-darker);
+    max-width: 640px;
+    margin: 0 auto;
+    width: 100%;
+    animation: fadeUp 0.8s 1.2s ease both;
+  }
+
+  .btn-retry {
+    background: transparent;
+    border: 1px solid var(--ink-faint);
+    color: var(--ink-faint);
+    font-family: 'Noto Serif SC', serif;
+    font-size: 13px;
+    letter-spacing: 3px;
+    padding: 14px 40px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .btn-retry:hover {
+    border-color: var(--ink);
+    color: var(--ink);
+  }
+
+  .result-note {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--ink-faint);
+    margin-top: 20px;
+    opacity: 0.6;
+  }
+
+  /* 右侧装饰文字 */
+  .side-text {
+    position: fixed;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%) rotate(90deg);
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: var(--ink-faint);
+    opacity: 0.2;
+    font-family: 'Noto Sans SC', sans-serif;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  @media (max-width: 480px) {
+    .quiz-body { padding: 36px 20px 20px; }
+    .quiz-nav { padding: 16px 20px 32px; }
+    .quiz-header { padding: 18px 20px 16px; }
+    .result-body { padding: 36px 20px; }
+    .design-note { padding: 36px 20px; }
+    .result-footer { padding: 24px 20px; }
+    .result-hero { padding: 48px 20px 36px; }
+    body::after { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="side-text">FBTI · 草木人格测试 · 是药三分毒</div>
+
+<!-- ============ INTRO ============ -->
+<div id="screen-intro" class="screen active">
+  <div class="intro-deco">YBTI · 草木人格测试</div>
+  <div class="intro-title">Y • B • T • I</div>
+  <div class="intro-title-sub">本草纲目里，藏着你的性格</div>
+  <div class="intro-divider"></div>
+  <p class="intro-desc">
+    每一味药都有药性，有毒性，有它能治的病，也有它配不了的方子。<br><br>
+    15道题，测出你的草木本性。
+  </p>
+  <div class="intro-stamp">是药三分毒</div>
+  <br>
+  <button class="btn-start" onclick="startQuiz()">开始测试</button>
+  <div class="intro-note">共 15 题 · 约 3 分钟</div>
+</div>
+
+<!-- ============ QUIZ ============ -->
+<div id="screen-quiz" class="screen">
+  <div class="quiz-header">
+    <div class="quiz-brand">草木</div>
+    <div class="quiz-counter"><span id="q-current">1</span> / 15</div>
+  </div>
+  <div class="progress-bar">
+    <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+  </div>
+  <div class="quiz-body">
+    <div class="q-number" id="q-number">第一题</div>
+    <div class="q-text" id="q-text"></div>
+    <div class="options" id="options-container"></div>
+  </div>
+  <div class="quiz-nav">
+    <button class="btn-next" id="btn-next" onclick="nextQuestion()">下一题 →</button>
+  </div>
+</div>
+
+<!-- ============ LOADING ============ -->
+<div id="screen-loading" class="screen">
+  <div class="loading-herb">草</div>
+  <div class="loading-text">正在辨药<span class="loading-dots"></span></div>
+</div>
+
+<!-- ============ RESULT ============ -->
+<div id="screen-result" class="screen">
+  <div class="result-hero">
+    <div class="result-tag">你的草木本性</div>
+    <div class="result-herb-name" id="result-name"></div>
+    <div class="result-tagline" id="result-tagline"></div>
+    <div class="result-dimensions" id="result-dims"></div>
+  </div>
+  <div class="result-body">
+    <div class="result-section">
+      <div class="section-label">你的药性</div>
+      <div class="section-content" id="result-xing"></div>
+    </div>
+    <div class="result-section">
+      <div class="section-label">你的毒性</div>
+      <div class="section-content" id="result-du"></div>
+    </div>
+    <div class="result-section">
+      <div class="section-label">你的药引</div>
+      <div class="section-content" id="result-yin"></div>
+    </div>
+    <div class="result-section">
+      <div class="section-label">与你相配的药</div>
+      <div class="pairing-list" id="result-pair"></div>
+    </div>
+  </div>
+
+  <div class="design-note">
+    <div class="design-note-title">· 测试说明 ·</div>
+    <div class="dim-explain" id="dim-explain"></div>
+  </div>
+
+  <div class="result-footer">
+    <button class="btn-retry" onclick="restartQuiz()">重新测试</button>
+    <div class="result-note">草木皆有性 · 是药三分毒</div>
+  </div>
+</div>
+
+<script>
+// ===================== 题目数据 =====================
+const questions = [
+  {
+    text: "抓一副药，你最先注意到的是——",
+    options: [
+      { text: "哪味药的气味最重", scores: { xing: 2, wei: -1, xing2: 0, xiao: 1 } },
+      { text: "包纸上写的份量和禁忌", scores: { xing: -2, wei: 2, xing2: -1, xiao: -1 } },
+      { text: "药材的颜色和形状", scores: { xing: 1, wei: -1, xing2: 1, xiao: 2 } },
+      { text: "这副药大概要熬多久", scores: { xing: -1, wei: 1, xing2: 2, xiao: -2 } }
+    ]
+  },
+  {
+    text: "熬药的时候，你是——",
+    options: [
+      { text: "全程守着，不敢离开", scores: { xing: 1, wei: 2, xing2: 2, xiao: -2 } },
+      { text: "定好时间，去做别的事", scores: { xing: -2, wei: -1, xing2: -1, xiao: 2 } },
+      { text: "时不时掀盖看一眼，闻闻味道", scores: { xing: 2, wei: -2, xing2: -2, xiao: -1 } },
+      { text: "交给别人，自己不擅长等待", scores: { xing: -1, wei: 1, xing2: -1, xiao: 2 } }
+    ]
+  },
+  {
+    text: "同一味药，有人说它救了自己，有人说它让自己更难受。你觉得——",
+    options: [
+      { text: "药没有错，是剂量的问题", scores: { xing: -2, wei: 2, xing2: -1, xiao: 2 } },
+      { text: "对的药遇上对的人才有用", scores: { xing: 1, wei: -2, xing2: -1, xiao: -2 } },
+      { text: "也许本来就不该用这味药", scores: { xing: -1, wei: 1, xing2: 2, xiao: -1 } },
+      { text: "结果好就是好药，不必深究", scores: { xing: 2, wei: -1, xing2: -2, xiao: 1 } }
+    ]
+  },
+  {
+    text: "有一味药，气味极冲，但药效极好。你会——",
+    options: [
+      { text: "捏着鼻子喝，效果最重要", scores: { xing: -1, wei: 2, xing2: -1, xiao: 2 } },
+      { text: "想办法加点别的东西盖住味道", scores: { xing: 2, wei: -2, xing2: -2, xiao: 1 } },
+      { text: "先少喝一点，慢慢适应", scores: { xing: 1, wei: -1, xing2: -1, xiao: -2 } },
+      { text: "换一副温和一点的方子", scores: { xing: -2, wei: 1, xing2: 2, xiao: -1 } }
+    ]
+  },
+  {
+    text: "你更像哪种药材的生长方式——",
+    options: [
+      { text: "深山里独自长成，无人打理", scores: { xing: -2, wei: 2, xing2: 2, xiao: -2 } },
+      { text: "被人精心栽培，按节气采收", scores: { xing: 1, wei: -2, xing2: -1, xiao: -1 } },
+      { text: "长在石缝里，哪里有缝往哪里钻", scores: { xing: -1, wei: 1, xing2: -2, xiao: 2 } },
+      { text: "水边野生，随水势漫延", scores: { xing: 2, wei: -1, xing2: -1, xiao: 1 } }
+    ]
+  },
+  {
+    text: "药引子的作用是引导其他药到达病处。你在一个团队里更像——",
+    options: [
+      { text: "药引子，帮别人发挥作用", scores: { xing: 2, wei: -2, xing2: 2, xiao: -2 } },
+      { text: "君药，定方向的那个", scores: { xing: -2, wei: 2, xing2: -1, xiao: 1 } },
+      { text: "佐药，平衡和调和", scores: { xing: 1, wei: -1, xing2: 2, xiao: -1 } },
+      { text: "说不清，每次角色都不一样", scores: { xing: -1, wei: 1, xing2: -2, xiao: 2 } }
+    ]
+  },
+  {
+    text: "同一株植物，根、茎、叶、花的药效各不相同。你觉得自己最有价值的部分——",
+    options: [
+      { text: "是根，藏在最深处，不轻易示人", scores: { xing: -2, wei: 2, xing2: 2, xiao: -1 } },
+      { text: "是花，短暂但让人难忘", scores: { xing: 2, wei: -1, xing2: -2, xiao: 2 } },
+      { text: "是叶，日常、普通、却不可或缺", scores: { xing: 1, wei: -2, xing2: -1, xiao: -2 } },
+      { text: "是茎，连接一切，自己却透明", scores: { xing: -1, wei: 1, xing2: 1, xiao: 1 } }
+    ]
+  },
+  {
+    text: "有些药需要炮制才能用，生药和熟药药性截然不同。你是——",
+    options: [
+      { text: "生药，原始、直接、未经打磨", scores: { xing: 2, wei: 2, xing2: -2, xiao: 2 } },
+      { text: "熟药，被经历改变过，但药效更稳", scores: { xing: -1, wei: -1, xing2: 2, xiao: -2 } },
+      { text: "还在炮制中，自己也不确定成了什么", scores: { xing: 1, wei: 1, xing2: 1, xiao: -1 } },
+      { text: "不同的人面前，你是不同的药", scores: { xing: -2, wei: -2, xing2: -1, xiao: 1 } }
+    ]
+  },
+  {
+    text: "中医讲急则治标，缓则治本。你处理问题更倾向——",
+    options: [
+      { text: "先把眼前最痛的解决掉", scores: { xing: 1, wei: 1, xing2: -2, xiao: 2 } },
+      { text: "找到根源，慢慢调", scores: { xing: -2, wei: 2, xing2: 2, xiao: -2 } },
+      { text: "标本兼治，但很累", scores: { xing: 2, wei: -1, xing2: 1, xiao: 1 } },
+      { text: "顺其自然，身体自有修复力", scores: { xing: -1, wei: -2, xing2: -1, xiao: -1 } }
+    ]
+  },
+  {
+    text: "药材讲究产地，同一种药，道地药材和普通货差异极大。你觉得环境对你的影响——",
+    options: [
+      { text: "极大，换个地方你就不是你", scores: { xing: 2, wei: -1, xing2: -2, xiao: -1 } },
+      { text: "有影响，但内核不会变", scores: { xing: -1, wei: 2, xing2: 2, xiao: -2 } },
+      { text: "影响的是表现，不是本质", scores: { xing: -2, wei: 1, xing2: 1, xiao: 1 } },
+      { text: "你在哪里都能活，适应力强", scores: { xing: 1, wei: -2, xing2: -1, xiao: 2 } }
+    ]
+  },
+  {
+    text: "有些药相遇是相须，相辅相成。有些药相遇是相畏，一方压制另一方。你在亲密关系里——",
+    options: [
+      { text: "需要旗鼓相当的人，势均力敌才舒服", scores: { xing: -2, wei: 2, xing2: 1, xiao: 2 } },
+      { text: "希望彼此补足，你弱的地方对方强", scores: { xing: 2, wei: -2, xing2: -2, xiao: -1 } },
+      { text: "容易不自觉地压过对方，或被压过", scores: { xing: 1, wei: 1, xing2: -1, xiao: 1 } },
+      { text: "保持一定距离，不完全融合", scores: { xing: -1, wei: -1, xing2: 2, xiao: -2 } }
+    ]
+  },
+  {
+    text: "储药讲究避光、防潮、密封。你保护自己的方式是——",
+    options: [
+      { text: "不轻易让人靠近，靠近了也有边界", scores: { xing: -2, wei: 1, xing2: 2, xiao: -2 } },
+      { text: "表现得比实际更强，让人觉得你不需要保护", scores: { xing: -1, wei: 2, xing2: -1, xiao: 1 } },
+      { text: "藏在人群里，用热闹挡住脆弱", scores: { xing: 2, wei: -2, xing2: -2, xiao: 2 } },
+      { text: "找一两个人，把自己完全交出去", scores: { xing: 1, wei: -1, xing2: 1, xiao: -1 } }
+    ]
+  },
+  {
+    text: "是药三分毒。你最容易伤到别人的方式是——",
+    options: [
+      { text: "太直，说了不该说的实话", scores: { xing: -1, wei: 2, xing2: -2, xiao: 2 } },
+      { text: "太冷，让人觉得你不在乎", scores: { xing: -2, wei: 1, xing2: 2, xiao: -1 } },
+      { text: "太满，给的太多让人喘不过气", scores: { xing: 2, wei: -2, xing2: -1, xiao: 1 } },
+      { text: "太淡，让人感觉你始终隔着一层", scores: { xing: 1, wei: -1, xing2: 1, xiao: -2 } }
+    ]
+  },
+  {
+    text: "有一种药，单独用时平淡无奇，配入方子才显出价值。你觉得自己——",
+    options: [
+      { text: "独自也能成立，不依赖配伍", scores: { xing: -2, wei: 2, xing2: 2, xiao: 1 } },
+      { text: "在对的关系里才能发挥真正的自己", scores: { xing: 2, wei: -2, xing2: -2, xiao: -2 } },
+      { text: "两种状态都有过，看和谁在一起", scores: { xing: 1, wei: -1, xing2: -1, xiao: 2 } },
+      { text: "其实还没找到属于自己的那个方子", scores: { xing: -1, wei: 1, xing2: 1, xiao: -1 } }
+    ]
+  },
+  {
+    text: "一副好药喝完，你希望留下的是——",
+    options: [
+      { text: "药到病除，干净利落，什么感觉都没有", scores: { xing: -2, wei: 1, xing2: 1, xiao: 2 } },
+      { text: "微微的余温，身体慢慢舒展开", scores: { xing: 2, wei: -2, xing2: -2, xiao: -2 } },
+      { text: "一点苦味留在喉咙，提醒你它来过", scores: { xing: -1, wei: 2, xing2: -1, xiao: -1 } },
+      { text: "说不清的感觉，但比之前好了", scores: { xing: 1, wei: -1, xing2: 2, xiao: 1 } }
+    ]
+  }
+];
+
+// scores维度: xing=药性(正=热/负=寒), wei=药味(正=苦/负=甘), xing2=药形(正=沉/负=轻), xiao=药效(正=缓/负=急)
+
+// ===================== 药材数据 =====================
+const herbs = {
+  fuling: {
+    name: "茯苓",
+    dims: ["寒","苦","沉","缓"],
+    tagline: "你不声张，但你是很多人的地基。",
+    xing: "茯苓生在松树根下，寄木而生，外皮粗粝，内里却是干净的白。你大概也是这样的人——不争着被看见，习惯退到后面，但你在的地方，别人莫名就安稳了。你不擅长表达，也不热衷于解释自己，但你是真的稳。不是那种表演出来的稳，是骨子里的、经过长时间沉淀的稳。朋友圈里你可能不是最活跃的，但出了事大家第一个想到的往往是你。你承受的比你说出口的多得多。",
+    du: "你太能扛了，扛到别人以为你不需要被照顾。你很少开口说我也很累，久了，周围的人真的会忘记你也有重量。你的沉默有时候不是平静，是已经懒得说了——而这种懒得说，某天会变成真正的疏远。",
+    yin: "你需要一个真的会问你你还好吗的人，而且问了会等你回答的那种。你在安静、有秩序的环境里才能真正放松。你需要被允许不坚强，哪怕只是一小会儿。",
+    pair: [
+      "和当归相遇，是被好好照顾了一次",
+      "和柴胡相遇，两个都在扛，终于有人懂",
+      "和薄荷相遇，你沉它轻，意外地平衡",
+      "和附子相遇，小心——你的稳会让它更肆无忌惮"
+    ]
+  },
+  baizhu: {
+    name: "白术",
+    dims: ["寒","苦","沉","缓"],
+    tagline: "你是那种走了才知道有多重要的人。",
+    xing: "白术补气健脾，不是最耀眼的药，但一副方子少了它往往就散了。你大概也清楚自己的位置——不是主角，但你在，整件事就能运转。你做事踏实，不喜欢说大话，也不爱出风头。你有自己的判断，只是不常说出来。你需要很长时间才能信任一个人，但一旦信任，就是真的信任。",
+    du: "你太低调了，低调到别人容易忽视你的需求。你习惯性地把自己的感受排在最后，以为这是成熟，但有时候只是委屈。你不够灵活，遇到需要快速变通的情况容易陷入僵局。",
+    yin: "你需要被真正看见的感觉，哪怕只是一句你做的我都知道。稳定的节奏和可预期的环境让你发挥最好。你需要身边有一个会主动打破沉默的人。",
+    pair: [
+      "和茯苓相遇，是两个沉默的人终于不用解释",
+      "和生姜相遇，它的热让你慢慢松开",
+      "和远志相遇，一个藏着野心，一个守着本分，意外互补",
+      "和麝香相遇，你会被它的存在感淹没"
+    ]
+  },
+  bingpian: {
+    name: "冰片",
+    dims: ["寒","苦","沉","急"],
+    tagline: "你看穿了很多事，但你选择不说。",
+    xing: "冰片通窍醒神，气味极透，一点点就能穿透所有障碍。你有这种穿透力——你能很快看到一个人的本质，看到一件事的核心，看到别人还在绕圈的地方。你不喜欢废话，也不喜欢绕弯子，你的判断往往又快又准。你的世界很清醒，清醒到有时候会觉得孤独。",
+    du: "你的清醒是把双刃剑。你看穿一个人之后，很难再对他有新鲜感。你有时候太快下结论，把还有可能的东西提前关上了门。你的直接在某些人那里是冒犯，你不是不知道，只是觉得不值得改。",
+    yin: "你需要一个能跟上你思维速度的人，一个你看不穿的人。你在需要快速决策的场合里如鱼得水。你需要偶尔被人说服，证明世界还有你没预料到的可能。",
+    pair: [
+      "和远志相遇，一个通透一个深藏，相互好奇",
+      "和茯苓相遇，是罕见的不需要解释的安静",
+      "和芍药相遇，你的冷遇上它的烈，彼此都被撼动",
+      "和枸杞相遇，你会觉得它的焦虑毫无必要"
+    ]
+  },
+  fuzi: {
+    name: "附子",
+    dims: ["寒","苦","轻","急"],
+    tagline: "你是烈的，你知道，你不打算改。",
+    xing: "附子大热大毒，但也是回阳救逆的要药——真正的险症，非它不可。你是走极端的人。你的爱很烈，你的恨也很烈，你很少有还好的状态。你有一种别人没有的能量，在最糟糕的时刻反而能燃起来。你不按常规出牌，也不想按。你的存在对某些人来说是救命的，对另一些人来说是危险的——你对这件事心知肚明。",
+    du: "你的毒是真实的。你在情绪激动时说出的话，在冲动时做出的决定，会造成你后来自己都感到意外的伤害。你燃得快，灭得也快，中间没有太多缓冲给别人适应。你容易让人上瘾，然后在某个时刻骤然抽离。",
+    yin: "你需要能真正驾驭你的人，不是压制你，是能接住你的全部而不被烧伤。你在有清晰目标的环境里才不会自我消耗。你需要有人告诉你：你不用时刻都是极致的。",
+    pair: [
+      "和茯苓相遇，它的稳是你少有的落脚点",
+      "和冰片相遇，两个通透的人，彼此看穿却不害怕",
+      "和甘草相遇，它能解你的毒，但代价是你会觉得它太平",
+      "和芍药相遇，两把火，要么成全要么烧光"
+    ]
+  },
+  juhua: {
+    name: "菊花",
+    dims: ["寒","苦","轻","缓"],
+    tagline: "你有自己的标准，你宁愿孤独也不愿将就。",
+    xing: "菊花清热明目，傲霜而开，历来是不随流俗的意象。你有审美，有原则，有一套自己的评判体系——而且你对这套体系相当坚持。你不是不能融入，是你选择不融入你觉得不值得的地方。你对美和质量有近乎苛刻的感知，你不主动拒绝人，但你的气场本身就在筛选。",
+    du: "你的标准有时候是一堵墙，把真心想靠近的人也挡在外面了。你不够宽容，对自己也对别人。你会因为一件小事对一个人的评价整体下滑，而且很难逆转。你的清高有时候只是一种更体面的防御。",
+    yin: "你需要真正懂你的人，不是欣赏你表面的那种，是能说出你在意什么的那种。你在有美感、有质量的环境里才能真正舒展。你需要有人让你知道不完美的东西也可以值得。",
+    pair: [
+      "和石斛相遇，两个对环境都挑剔的人，意外地相互理解",
+      "和薄荷相遇，一个清冷一个凉透，是气质上的契合",
+      "和生姜相遇，它的烟火气会让你不舒服，但也许正是你需要的",
+      "和附子相遇，你会被它的烈震到，然后迅速保持距离"
+    ]
+  },
+  wumei: {
+    name: "乌梅",
+    dims: ["寒","苦","轻","缓"],
+    tagline: "你记得所有事，包括那些你说已经忘了的。",
+    xing: "乌梅收敛、生津，它的酸是一种记忆——吃过一次，那个味道就留下来了。你是记性极好的人，不只是记事，是记感受。一段关系里谁说过什么、在什么时刻是什么态度，你都记得清清楚楚，即使你表面上表现得云淡风轻。你不轻易原谅，也不轻易忘记——但你也不常翻旧账，你只是把它们收起来，放在你自己知道的地方。",
+    du: "你收得太紧了。你把很多东西压缩进去，以为存着就是处理了，但其实只是延后了。你的算了通常不是真的算了，是暂时放下等以后再算。你有时候会用记忆来折磨自己，反复咀嚼已经过去的事。",
+    yin: "你需要一个能让你真正放下的人，不是劝你的那种，是让你觉得有些事不值得记那么清楚的那种。你在稳定、有情感纵深的关系里才能松开。你需要学会允许自己忘记一些东西。",
+    pair: [
+      "和茯苓相遇，两个都不轻易说出口，但彼此知道",
+      "和当归相遇，它的温柔会让你的收敛慢慢松开",
+      "和冰片相遇，都是清醒的人，都记得太多",
+      "和川芎相遇，它的快会把你带出困在记忆里的状态"
+    ]
+  },
+  shihu: {
+    name: "石斛",
+    dims: ["寒","甘","沉","缓"],
+    tagline: "你对的人很少，但你全给。",
+    xing: "石斛生在悬崖峭壁，对生长环境极其苛刻，但正因如此，它的药效稀少而珍贵。你对人、对环境的要求很高，不是挑剔，是你清楚自己在什么样的土壤里才能真正生长。你不随便付出，但一旦付出，是真的全力以赴。你的情感不廉价，你的信任不廉价，所以拥有你的人其实拥有的是一件极其难得的东西。",
+    du: "你的门槛让很多真心的人望而却步，而你在等待的过程里会显得冷漠，甚至有点孤傲。你不主动，哪怕你其实在意。你有时候过于依赖感觉，而感觉这件事并不总是准的。",
+    yin: "你需要有人耐心等过你的冷淡期，然后发现里面有温度。稳定、纯粹、不嘈杂的环境让你最好。你需要被证明：放下门槛不一定是失去自己。",
+    pair: [
+      "和茯苓相遇，是两个安静的人终于找到不用表演的地方",
+      "和菊花相遇，都对环境挑剔，都在等值得的东西",
+      "和桂枝相遇，它的温通会慢慢化开你的冷",
+      "和川芎相遇，你会觉得它太吵，但它会让你的世界透气"
+    ]
+  },
+  lianzi: {
+    name: "莲子",
+    dims: ["寒","甘","沉","缓"],
+    tagline: "你是出淤泥的那种干净，但你心里有苦，你不说。",
+    xing: "莲子清心安神，莲心极苦，莲子本身却是甘的——它用苦的内核养出甘的外表。你有强烈的理想主义，你相信人可以更好，相信有些东西值得坚守。你很少抱怨，即使处境不好，你也倾向于往好处想。但你内心承受的并不少，那些苦你选择自己咽下去，因为你觉得说出来也没用，或者不想让别人担心。",
+    du: "你对自己太苛刻了。你给自己设定了一个不能污的标准，这让你在不够理想的现实里持续内耗。你的不说有时候不是豁达，是你已经不相信说了会有人真正接住。",
+    yin: "你需要一个能接住你的苦的人，不是帮你解决，是真的愿意听。你在有信念感的环境里才能生长。你需要允许自己不那么干净，不那么完整。",
+    pair: [
+      "和当归相遇，两个都在治愈，终于有人治愈了彼此",
+      "和茯苓相遇，是沉默但安稳的同行",
+      "和薄荷相遇，它的凉会让你的某些执念松动",
+      "和麝香相遇，它的复杂会让你不舒服，但也会让你看见你没见过的世界"
+    ]
+  },
+  yuanzhi: {
+    name: "远志",
+    dims: ["寒","甘","沉","急"],
+    tagline: "你的名字比你承认的更诚实。",
+    xing: "远志安神益智，但这味药最有意思的是它的名字——它叫远志，藏着一种不甘平凡的暗涌。你大概也是这样：表面上可以很沉静，甚至给人一种随遇而安的感觉，但你内心某个角落有一个不小的野心，或者说，一个很远的想象。你不常说出来，甚至有时候自己都不承认，但它在。",
+    du: "你的野心和你的表现之间有一道缝。你想要的和你愿意为之付出的之间，有时候也有一道缝。你用沉静包裹着一个躁动的内核，这种不一致会让你长期处于一种说不清道不明的焦虑里。",
+    yin: "你需要一个能看见你野心的人，不评判，不催促，只是看见。你在有清晰远景的环境里才能真正激活。你需要有人推你一把，或者允许你自己推自己。",
+    pair: [
+      "和冰片相遇，一个通透一个深藏，彼此好奇",
+      "和白术相遇，一个有野心一个守本分，意外地稳",
+      "和川芎相遇，它的行动力会把你的远志变成实际的动作",
+      "和石斛相遇，两个都等待着什么，有时候会一起等太久"
+    ]
+  },
+  bohe: {
+    name: "薄荷",
+    dims: ["寒","甘","轻","缓"],
+    tagline: "你很凉，但你路过的地方都记得你。",
+    xing: "薄荷疏散风热，清利头目，气味一到，整个空间都变了。你就是这种存在——你不是最重要的那个，但你在场，气氛就不一样。你清醒，你轻盈，你不执着，你来了也会走，走了也不留太多遗憾。但你路过的人会记得你，不是因为你用力，是因为你有一种稀少的、让人清醒的气质。",
+    du: "你的轻有时候是一种逃。你不执着的背后，有时候是不敢执着。你让人觉得你随时可以离开，于是他们也学会了不太依赖你——这保护了你，但也让你很难被真正留住。",
+    yin: "你需要一个不害怕你的轻的人，一个不试图把你留住但让你自己想留下来的人。你在自由、流动的环境里才能最舒服。你需要有一件事，一个人，值得你真正扎下去。",
+    pair: [
+      "和菊花相遇，两个清冷的人，彼此懂得那种孤傲背后的温柔",
+      "和莲子相遇，你的轻会让它的重慢慢透气",
+      "和附子相遇，你会被它的烈吸引，但你的本能会告诉你保持距离",
+      "和当归相遇，是很久没有的、被好好接住的感觉"
+    ]
+  },
+  banxia: {
+    name: "半夏",
+    dims: ["寒","甘","轻","急"],
+    tagline: "你不按季节开放，你只按自己的时区活着。",
+    xing: "半夏夏天生、夏天采，但它的名字里有半，意味着一种不完整、不按常规的存在感。生半夏有毒，炮制后才能用——你大概也是这样：原始状态下有一种让人应接不暇的强度，经过一些经历之后，那股劲被转化成了真正有用的东西。你不按套路出牌，你有自己的逻辑，你的逻辑有时候别人一时看不懂，但事后会发现你是对的。",
+    du: "你的不按常理在某些人那里是魅力，在另一些人那里是不可靠。你的快有时候让别人没有反应时间，你的偏有时候让关系里出现难以弥合的错位。你容易在一个想法上走极端，然后骤然转向。",
+    yin: "你需要一个能跟上你节奏又不会被你带乱的人，最好是能在你走偏的时候轻轻拉一下的那种。你在有创造空间的环境里才能发挥。你需要有人告诉你，你的那股偏劲是好东西，不用藏。",
+    pair: [
+      "和冰片相遇，两个都看得透，但方向不同，碰撞出意思",
+      "和川芎相遇，两个快节奏的人，一起能量极强，要小心不要互相耗尽",
+      "和茯苓相遇，它的沉稳是你少有的真正能停下来的理由",
+      "和甘草相遇，它会解你一部分的毒，但你会嫌它太平"
+    ]
+  },
+  chaihu: {
+    name: "柴胡",
+    dims: ["热","苦","沉","缓"],
+    tagline: "你帮所有人疏通，就是不疏通自己。",
+    xing: "柴胡疏肝解郁，是解郁第一药——它最擅长的事，是把积压的、堵住的东西化开。你是朋友里最擅长开导人的那个，你能说到点子上，你有耐心，你知道怎么让一个郁着的人慢慢松开。但有意思的是，你自己也有一口郁气，只是你不怎么找人说。你用帮助别人来消化自己的情绪，这个方式在某种程度上是有效的，但并不总够用。",
+    du: "你太习惯做那个想得开的人了，以至于你自己的情绪找不到出口。你在别人那里是解药，在自己这里是病人，而你不太愿意承认这一点。你会因为长期输出而不自觉地变得疲惫，但如果有人问你怎么了，你还是会说没事。",
+    yin: "你需要一个反过来开导你的人，真正问你你最近怎么了然后等你说完的那种。你在有人情味、有流动感的环境里才能真正放松。你需要允许自己也是需要被照顾的。",
+    pair: [
+      "和茯苓相遇，两个都在扛，终于有人懂",
+      "和当归相遇，它会把你照顾得很好，让你卸下那口气",
+      "和丹参相遇，两个处理烂摊子的人，相处起来非常默契",
+      "和附子相遇，你能帮它疏解，但它的烈度可能超出你的承受范围"
+    ]
+  },
+  danshen: {
+    name: "丹参",
+    dims: ["热","苦","沉","缓"],
+    tagline: "你擅长收拾烂摊子，但你从不说这件事有多难。",
+    xing: "丹参活血化瘀，专门处理积压、淤堵、已经结成块的问题。你是那种在混乱里反而能冷静下来的人，别人乱了阵脚的时候，你开始想怎么一步一步把事情理清楚。你不怕复杂，不怕费力，不怕别人已经放弃了的东西。你有一种执拗的耐心，愿意在别人都走了之后还留着把事情做完。你不爱说自己做了什么，做完了就算了。",
+    du: "你太擅长处理烂摊子，所以有时候别人默认你可以，默认你愿意，默认你不会累。久了，你自己也开始默认这一点。你不主动说难，所以没人知道你也有撑不住的时刻。",
+    yin: "你需要一个主动替你分担的人，不用你开口的那种。你在有实质问题可以解决的环境里才有成就感。你需要有人告诉你：不是所有烂摊子都需要你来收拾。",
+    pair: [
+      "和柴胡相遇，两个处理烂摊子的人，相处非常默契",
+      "和茯苓相遇，是沉默但真实的同行",
+      "和生姜相遇，它的直接会让你笑出来，然后松一口气",
+      "和麝香相遇，你会帮它处理它留下的烂摊子，然后有点无奈"
+    ]
+  },
+  huanglian: {
+    name: "黄连",
+    dims: ["热","苦","沉","急"],
+    tagline: "你知道你不好相处，你认了。",
+    xing: "黄连极苦，是苦药里的代表，但清热泻火的效果极好——真正上火的时候，没有什么比黄连更有用。你大概也清楚自己不是最受欢迎的那种人。你直接，你真实，你说的话有时候让人当场不舒服，但事后想想是对的。你不擅长包装，不擅长铺垫，有话就说，说完算数。你在真正有问题的时候是最可靠的那个。",
+    du: "你的直接有时候是一种懒——懒得顾及别人的感受，或者懒得解释为什么你这么说。你的我就是这样是真的，但它有时候成了你不肯改变的盾牌。你急，你的急会让人来不及跟上，然后你会觉得别人太慢。",
+    yin: "你需要一个不被你的苦吓跑、真正能接住你的人。你在有实质目标的环境里才能发挥。你需要有人偶尔帮你翻译一下，把你的苦口转成别人能接受的方式。",
+    pair: [
+      "和甘草相遇，它能中和你的苦，而且是真的不嫌你",
+      "和茯苓相遇，它的稳接得住你的急",
+      "和冰片相遇，两个不绕弯子的人，反而省事",
+      "和芍药相遇，它的烈遇上你的苦，要么火花要么翻车"
+    ]
+  },
+  shexiang: {
+    name: "麝香",
+    dims: ["热","苦","轻","缓"],
+    tagline: "你走过的地方，气味久久不散。",
+    xing: "麝香是名贵香料也是药材，气味穿透力极强，用量极少，但存在感无法忽视。你是那种进入一个房间，气场先到的人。你不一定说最多话，但你说的话会被记住。你对人有一种很难解释的吸引力，你自己不一定刻意经营，但效果就在那里。你的情感很深，但不轻易给，所以真正得到你的人知道那是多少分量的东西。",
+    du: "你的存在感是双刃剑。你吸引人，但你也让人上瘾，让人在你离开之后很长时间里找不回正常节奏。你有时候不是故意的，但后果是真实的。你在结束一段关系时往往比对方恢复得更快，这个落差会造成真实的伤害。",
+    yin: "你需要一个不会被你的存在感压倒、也不会试图驯服你的人。你在有深度、有质感的环境里才能真正安定。你需要有人让你愿意真正停下来。",
+    pair: [
+      "和冰片相遇，两个穿透力强的人，彼此是少数能接住对方的存在",
+      "和莲子相遇，你的复杂会让它不舒服，但也会让它见识它没见过的世界",
+      "和甘草相遇，它能把你的气味稀释到别人能靠近的程度",
+      "和附子相遇，两个强度都极高，结果只有两种：成全或者彼此消耗殆尽"
+    ]
+  },
+  chuanxiong: {
+    name: "川芎",
+    dims: ["热","苦","轻","急"],
+    tagline: "你永远在动，你也不确定要去哪里。",
+    xing: "川芎行气活血，走而不守，是方子里最能动的那味药——它不定居，它推动，它让其他药都跟着它流动起来。你是永远在动的人，身体在动，思维在动，情绪在动。你不喜欢停在原地，停下来会让你焦虑。你的行动力极强，想到就做，而且你做事的时候有一种带动性，周围的人很容易跟着你的节奏走。",
+    du: "你的动有时候是一种逃。你用行动填满所有空隙，以至于没有空间去真正面对那些需要静下来处理的事。你开始很多事，结束的比开始的少。你容易把周围的人带进你的节奏，然后他们跟不上，你又已经走远了。",
+    yin: "你需要一个能给你方向感的人，或者一件真正值得你停下来的事。你在有流动感、有新鲜刺激的环境里才能最舒服。你需要学会在动的间隙给自己留一点空白。",
+    pair: [
+      "和远志相遇，你的行动力会把它的远志变成真实的动作",
+      "和半夏相遇，两个快节奏，一起能量很强，要注意不要互相耗尽",
+      "和茯苓相遇，它是你少有的能真正停下来的理由",
+      "和石斛相遇，你的快会把它的慢搅乱，但也会带它看见它原本错过的东西"
+    ]
+  },
+  renshen: {
+    name: "人参",
+    dims: ["热","甘","沉","缓"],
+    tagline: "你承载着太多人的期待，包括你自己的。",
+    xing: "人参是补药之首，珍贵，稀少，被赋予了极高的期待。你大概也背负着这种重量——来自别人的期待，来自你自己给自己的标准。你有真实的能力，有真实的温度，你在很多人的生命里确实起到了关键的作用。但人参这个标签也意味着你很难被当作普通人对待，你很难示弱，你很难说我今天状态不好。",
+    du: "你太贵重了，贵重到被放在高处，没有人想到你也会累，也会冷，也需要被补一补。你对自己要求极高，高到有时候不允许自己失败。你的付出里有时候混着一种我不能让人失望的恐惧，那不是纯粹的给予，是有代价的给予。",
+    yin: "你需要一个让你可以不是人参的人，在那个人面前你可以只是一个普通的、有时候状态不好的人。你在被真正重视而不是被消费的环境里才能持续生长。你需要学会保存一部分自己，不给任何人。",
+    pair: [
+      "和当归相遇，一个补气一个补血，是真正意义上的相须",
+      "和茯苓相遇，它的稳让你难得地不用撑着",
+      "和石斛相遇，两个都珍贵，都被期待，彼此懂得那种重量",
+      "和川芎相遇，它会带你动起来，让你从被需要里暂时解脱"
+    ]
+  },
+  danggui: {
+    name: "当归",
+    dims: ["热","甘","沉","缓"],
+    tagline: "你总在治愈别人，你也在漂泊。",
+    xing: "当归补血活血，药名里有归——回归、归处、归宿。但当归本身是漂泊的，从产地到药铺到方子，它一直在路上。你是治愈型的人，你有天然的温柔，你会照顾人，你让人觉得在你身边是安全的。但你自己的归处在哪里，是一个你有时候不敢细想的问题。",
+    du: "你给得太自然了，自然到别人忘记你也需要被给予。你把照顾别人当成一种本能，但本能不是无限的。你的漂泊感有时候会让你在最亲近的关系里也保持着一点距离，作为随时可以离开的准备——即使你其实不想离开。",
+    yin: "你需要一个让你觉得这里是我的地方的人或者环境，真正意义上的归处。你在温暖、有人情味的地方才能真正放下那根弦。你需要允许自己被照顾，哪怕你觉得自己不需要。",
+    pair: [
+      "和人参相遇，一个补气一个补血，是真正的相须",
+      "和莲子相遇，两个都在治愈，终于有人治愈彼此",
+      "和薄荷相遇，它的轻会让你暂时卸下那份沉",
+      "和柴胡相遇，它把你疏通，你温柔地接住它郁着的那部分"
+    ]
+  },
+  guizhi: {
+    name: "桂枝",
+    dims: ["热","甘","沉","急"],
+    tagline: "你不是主角，但没有你，整个故事散了。",
+    xing: "桂枝温通经脉，能把药性引导到需要去的地方，它的作用是推动和温暖，是让整个方子活起来的那个。你在一个关系或团队里往往是那个让事情真正开始流动的人——不是最显眼的，但你一动，全局都动了。你有温度，你主动，你不计较自己是不是被看见，你只是想让事情往好的方向走。",
+    du: "你太愿意推动别人了，有时候忘记问别人是不是真的想被推动。你的好意有时候来得太快，让对方没有空间自己找到节奏。你容易把温暖别人当成你存在的方式，久了会不知道在没有人需要推动的时候你是谁。",
+    yin: "你需要一个让你不用随时准备推动什么、可以只是待着的人。你在有明确目标和流动感的环境里最有能量。你需要有人把你推动一次，让你知道被推动是什么感觉。",
+    pair: [
+      "和石斛相遇，你的温通会慢慢化开它的冷",
+      "和茯苓相遇，你推它，它稳你，是一种意外的平衡",
+      "和黄连相遇，你的甘能中和它的苦，让它变得更好接近",
+      "和附子相遇，两个温热的存在，方向一致时是极强的合力"
+    ]
+  },
+  shaoyao: {
+    name: "芍药",
+    dims: ["热","甘","轻","缓"],
+    tagline: "你盛烈过，你不后悔。",
+    xing: "芍药花期短暂，但开起来是惊艳的——它不把力气省着，它全开。你有一种情感的饱满度，当你在乎的时候，你真的在乎，不遮掩，不保留。你对美有感知，对人有热情，你活在当下的能力很强，你知道有些时刻过了就过了，所以你选择全力以赴地感受它。你的存在让周围的人觉得活着是有意思的。",
+    du: "你的全力以赴是有代价的——你会在盛开之后迅速枯竭，进入一段漫长的低潮。你的情绪波动比别人大，高的时候很高，低的时候很低，中间地带很少。你容易在一段关系里投入过多，然后在某个时刻发现对方根本没有匹配你的力度。",
+    yin: "你需要一个能接住你全部盛烈的人，不害怕你的高，也不嫌弃你的低。你在有美感、有情感浓度的环境里才能真正舒展。你需要学会在盛开之余给自己留一点根。",
+    pair: [
+      "和当归相遇，它的温柔会接住你高烈度之后的疲惫",
+      "和冰片相遇，你的烈遇上它的冷，彼此都被撼动",
+      "和麝香相遇，两个存在感都强的人，要么成全要么太满",
+      "和白术相遇，它的踏实会让你慢慢有了落脚的地方"
+    ]
+  },
+  aicao: {
+    name: "艾草",
+    dims: ["热","甘","轻","缓"],
+    tagline: "你野生的，你也是治愈的。",
+    xing: "艾草到处都长，田间地头，墙角路边，没有人专门种它，但它每年都回来。它有烟火气，有粗粝的生命力，艾灸的热是那种从深处往外透的温暖。你是有野生感的人，不依赖特定的环境也能活，也能把周围的人照顾得很好。你的治愈不是精致的那种，是扎实的、下沉的、让人从骨头里暖起来的那种。",
+    du: "你的随遇而安有时候让你对自己不够好。你习惯了在任何条件下生存，久了会忘记你其实可以要求更好的土壤。你的扎实有时候变成了不懂得给自己和别人一些仪式感。",
+    yin: "你需要一个欣赏你的野生感、而不是试图把你驯化的人。你在接地气、有人情味的地方才能最自在。你需要有人提醒你：你不用在任何地方都能活，你可以选择只在好的地方生长。",
+    pair: [
+      "和生姜相遇，两个烟火气的人，在一起非常对味",
+      "和莲子相遇，你的野让它见识了另一种干净",
+      "和菊花相遇，你的粗粝会让它不舒服，但也会让它松动一些",
+      "和石斛相遇，一个对环境没要求，一个对环境极挑剔，反而好奇"
+    ]
+  },
+  shengjiang: {
+    name: "生姜",
+    dims: ["热","甘","轻","急"],
+    tagline: "你直接，你热，你治好了很多人的寒。",
+    xing: "生姜辛温，发散风寒，是厨房里最常见的药，也是最接地气的存在。你不装，你直给，你说话做事都是短平快，你觉得绕弯子是浪费时间。你有市井智慧，你知道怎么和各种各样的人相处，你能让不同背景的人都觉得跟你在一起很自在。你热，你的热是那种实实在在、让人从里面暖过来的热，不是表演出来的。",
+    du: "你的直有时候缺少缓冲，你说出去的话有时候像生姜一样辣——对，但冲。你的接地气在某些场合里显得太随便。你的急会让你在需要等待和沉淀的事情上做出过早的判断。",
+    yin: "你需要一个能跟上你节奏、也能在你太冲的时候拉你一把的人。你在有烟火气、有实质内容的环境里最舒服。你需要有人让你知道，慢下来不等于没效率。",
+    pair: [
+      "和艾草相遇，两个烟火气，非常对味",
+      "和白术相遇，你的热让它慢慢松开",
+      "和丹参相遇，你的直接让它笑出来，然后松一口气",
+      "和菊花相遇，你的烟火气会让它不舒服，但也许正是它需要的"
+    ]
+  },
+  gouqi: {
+    name: "枸杞",
+    dims: ["热","甘","轻","急"],
+    tagline: "你比任何人都早开始担心那些还没发生的事。",
+    xing: "枸杞滋补肝肾，是养生文化里最具代表性的符号——泡着喝，随身带，未雨绸缪，提前准备。你是早熟的人，你很早就开始思考长远的事，开始操心别人还没意识到的问题。你有责任感，你有前瞻性，你想得比大多数人远。你的热情和你的焦虑是同一枚硬币的两面，你在乎，所以你焦虑。",
+    du: "你的焦虑会传染。你担心的事有时候还没发生，就已经在关系里制造了紧张感。你的提前准备有时候是一种控制——你用掌握信息和规划来对抗不确定性，但不确定性本来就是生活的一部分。",
+    yin: "你需要一个能让你真正放松、不用操心的人，在那个人身边你可以暂时把那根弦放下来。你在有掌控感、信息透明的环境里才能安心。你需要学会接受：有些事情，不提前准备也会好的。",
+    pair: [
+      "和茯苓相遇，它的稳能接住你的焦虑",
+      "和冰片相遇，你会觉得它的通透让你羡慕——它不焦虑，它只是看透了",
+      "和薄荷相遇，它的轻盈会暂时带走你的紧绷",
+      "和川芎相遇，两个都急，一起容易把事情弄得比需要的更复杂"
+    ]
+  },
+  gancao: {
+    name: "甘草",
+    dims: ["热","甘","轻","急"],
+    tagline: "你调和了所有人，你是最后一个被想起的那个。",
+    xing: "甘草是中药里用得最广的药，能调和诸药，能解百毒，几乎每一副方子里都有它。但正因为它太常见，人们很少单独想起它。你是关系里的润滑剂，你能和任何人相处，你能在任何氛围里找到自己的位置。你不制造冲突，你化解冲突。你的存在让很多事变得更顺，但顺了之后，功劳很少算在你身上。",
+    du: "你的百搭让你有时候不知道自己真正是什么。你调和太多人之后，容易失去自己的味道。你说没关系，说了很多次，有一天会突然发现其实是有关系的，而且已经积了很久了。",
+    yin: "你需要一个真正关心你是什么味道的人，不只是把你当调和剂用。你真正需要的是一个让你不用适应的地方。你需要有人问你：你自己想要什么？",
+    pair: [
+      "和黄连相遇，你能中和它的苦，它不嫌弃你平，是罕见的真正对等",
+      "和附子相遇，你能解它的毒，但要注意不要在这件事上耗尽自己",
+      "和麝香相遇，你能把它的气味稀释到别人能靠近的程度，它让你第一次觉得自己不可替代",
+      "和任何药相遇，你都能找到相处的方式——这是你的天赋，也是你的困境"
+    ]
+  }
+};
+
+// ===================== 计分逻辑 =====================
+// xing: 热为正, 寒为负
+// wei: 苦为正, 甘为负
+// xing2: 沉为正, 轻为负
+// xiao: 缓为正, 急为负
+
+function getResult(totals) {
+  const xing = totals.xing >= 0 ? "热" : "寒";
+  const wei = totals.wei >= 0 ? "苦" : "甘";
+  const xing2 = totals.xing2 >= 0 ? "沉" : "轻";
+  const xiao = totals.xiao >= 0 ? "缓" : "急";
+
+  // 平局检测（每个维度差值都小于3）
+  const isBalanced = Math.abs(totals.xing) < 3 && Math.abs(totals.wei) < 3 && 
+                     Math.abs(totals.xing2) < 3 && Math.abs(totals.xiao) < 3;
+  if (isBalanced) return herbs.gancao;
+
+  const combo = `${xing}·${wei}·${xing2}·${xiao}`;
+
+  // 同组合两种药材的区分：用最弱维度的绝对值
+  const minAbs = Math.min(Math.abs(totals.xing), Math.abs(totals.wei), Math.abs(totals.xing2), Math.abs(totals.xiao));
+  const isClose = minAbs <= 2;
+
+  const map = {
+    "寒·苦·沉·缓": isClose ? herbs.baizhu : herbs.fuling,
+    "寒·苦·沉·急": herbs.bingpian,
+    "寒·苦·轻·缓": isClose ? herbs.wumei : herbs.juhua,
+    "寒·苦·轻·急": herbs.fuzi,
+    "寒·甘·沉·缓": isClose ? herbs.lianzi : herbs.shihu,
+    "寒·甘·沉·急": herbs.yuanzhi,
+    "寒·甘·轻·缓": herbs.bohe,
+    "寒·甘·轻·急": herbs.banxia,
+    "热·苦·沉·缓": isClose ? herbs.danshen : herbs.chaihu,
+    "热·苦·沉·急": herbs.huanglian,
+    "热·苦·轻·缓": herbs.shexiang,
+    "热·苦·轻·急": herbs.chuanxiong,
+    "热·甘·沉·缓": isClose ? herbs.danggui : herbs.renshen,
+    "热·甘·沉·急": herbs.guizhi,
+    "热·甘·轻·缓": isClose ? herbs.aicao : herbs.shaoyao,
+    "热·甘·轻·急": isClose ? herbs.gouqi : herbs.shengjiang,
+  };
+
+  return map[combo] || herbs.gancao;
+}
+
+// ===================== 状态 =====================
+let currentQ = 0;
+let answers = [];
+let totals = { xing: 0, wei: 0, xing2: 0, xiao: 0 };
+let selectedOption = null;
+
+const qNumbers = ["第一题","第二题","第三题","第四题","第五题","第六题","第七题","第八题","第九题","第十题","第十一题","第十二题","第十三题","第十四题","第十五题"];
+
+// ===================== 函数 =====================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function startQuiz() {
+  currentQ = 0;
+  answers = [];
+  totals = { xing: 0, wei: 0, xing2: 0, xiao: 0 };
+  selectedOption = null;
+  renderQuestion();
+  showScreen('screen-quiz');
+}
+
+function renderQuestion() {
+  const q = questions[currentQ];
+  document.getElementById('q-current').textContent = currentQ + 1;
+  document.getElementById('q-number').textContent = qNumbers[currentQ];
+  document.getElementById('q-text').textContent = q.text;
+  document.getElementById('progress-fill').style.width = `${(currentQ / 15) * 100}%`;
+
+  const container = document.getElementById('options-container');
+  container.innerHTML = '';
+  const labels = ['A', 'B', 'C', 'D'];
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="option-label">${labels[i]}</span>${opt.text}`;
+    btn.onclick = () => selectOption(i, btn);
+    container.appendChild(btn);
+  });
+
+  selectedOption = null;
+  const nextBtn = document.getElementById('btn-next');
+  nextBtn.classList.remove('visible');
+  nextBtn.textContent = currentQ < 14 ? '下一题 →' : '查看结果 →';
+}
+
+function selectOption(idx, btn) {
+  document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedOption = idx;
+  document.getElementById('btn-next').classList.add('visible');
+}
+
+function nextQuestion() {
+  if (selectedOption === null) return;
+
+  const scores = questions[currentQ].options[selectedOption].scores;
+  totals.xing += scores.xing;
+  totals.wei += scores.wei;
+  totals.xing2 += scores.xing2;
+  totals.xiao += scores.xiao;
+
+  currentQ++;
+  if (currentQ < 15) {
+    renderQuestion();
+  } else {
+    showLoading();
+  }
+}
+
+function showLoading() {
+  showScreen('screen-loading');
+  setTimeout(() => showResult(), 2000);
+}
+
+function showResult() {
+  const herb = getResult(totals);
+  
+  document.getElementById('result-name').textContent = herb.name;
+  document.getElementById('result-tagline').textContent = herb.tagline;
+  
+  const dimsEl = document.getElementById('result-dims');
+  dimsEl.innerHTML = herb.dims.map(d => `<span class="dim-tag">${d}</span>`).join('');
+  
+  document.getElementById('result-xing').textContent = herb.xing;
+  document.getElementById('result-du').textContent = herb.du;
+  document.getElementById('result-yin').textContent = herb.yin;
+  
+  const pairEl = document.getElementById('result-pair');
+  pairEl.innerHTML = herb.pair.map(p => `<div class="pairing-item">${p}</div>`).join('');
+
+  // 维度说明
+  const xing = totals.xing >= 0 ? "热" : "寒";
+  const wei = totals.wei >= 0 ? "苦" : "甘";
+  const xing2 = totals.xing2 >= 0 ? "沉" : "轻";
+  const xiao = totals.xiao >= 0 ? "缓" : "急";
+
+  const dimData = [
+    {
+      icon: "🌡️", title: "药性 — 寒 vs 热", you: xing,
+      desc: `寒：冷静、抽离、理性、不轻易动情\n热：热烈、冲动、共情强、容易燃也容易熄`
+    },
+    {
+      icon: "🌿", title: "药味 — 苦 vs 甘", you: wei,
+      desc: `苦：直接、不讨好、真话多、让人难以亲近但信得过\n甘：圆融、温和、易相处、但有时候让人摸不清真实想法`
+    },
+    {
+      icon: "🪨", title: "药形 — 沉 vs 轻", you: xing2,
+      desc: `沉：内敛、稳重、藏得深、不轻易表态\n轻：外显、灵动、感知敏锐、风吹就有反应`
+    },
+    {
+      icon: "⏳", title: "药效 — 缓 vs 急", you: xiao,
+      desc: `缓：慢热、长线、温水煮、后劲大\n急：见效快、直给、短平快、不喜欢等待`
+    }
+  ];
+
+  document.getElementById('dim-explain').innerHTML = dimData.map(d => `
+    <div class="dim-row">
+      <div class="dim-row-title">${d.icon} ${d.title} → <span class="dim-you">你偏「${d.you}」</span></div>
+      <div class="dim-row-desc">${d.desc.replace(/\n/g, '<br>')}</div>
+    </div>
+  `).join('');
+
+  showScreen('screen-result');
+}
+
+function restartQuiz() {
+  startQuiz();
+}
+</script>
+</body>
+</html>
